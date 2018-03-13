@@ -8,6 +8,8 @@ name = "pypi"
 [packages]
 
 requests = "*"
+click = "*"
+"e1839a8" = {path = ".", editable = true}
 
 
 [dev-packages]
