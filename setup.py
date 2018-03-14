@@ -6,7 +6,8 @@ setup(
     py_modules=['evesh'],
     install_requires=[
         'Click',
-        'Requests'
+        'Requests',
+        'Maya'
     ],
     entry_points='''
         [console_scripts]   

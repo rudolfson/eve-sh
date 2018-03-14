@@ -10,4 +10,5 @@ The project uses pipenv, I'm following instructions from
 * [click-shell](http://click-shell.readthedocs.io/) - turn click into a shell interpreter
 * [Flask](http://flask.pocoo.org/) - http server 
 * [Requests](http://docs.python-requests.org/en/master/) - http client
+* [Maya](https://github.com/kennethreitz/maya) - date time library
 

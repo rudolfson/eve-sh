@@ -1,7 +1,7 @@
 import click
 import requests
-import json
 from market import evepraisal
+from planets import planets
 
 URL = 'https://esi.tech.ccp.is/latest/{0}?datasource=tranquility'
 
@@ -32,10 +32,22 @@ def market():
 @click.option('--persist', is_flag=True, help='create a persistent praisal for later referral')
 @click.argument('items')
 def value(persist, items):
-    """estimate the value of items"""
+    """estimate the value of ITEMS (comma separated list of full item names)"""
     values = evepraisal.value(items, persist=persist)
     click.secho('{0} buy: {1:>28}\n{0} sell: {2:>27}'.format(click.style(values['market'], fg='white'),
                                                              click.style('{:,.2f}'.format(values['buy']), fg='yellow'),
                                                              click.style('{:,.2f}'.format(values['sell']), fg='blue')))
 
-    # click.echo(json.dumps(response))
+
+@cli.group()
+def pi():
+    """planetary interaction related commands"""
+    pass
+
+
+@pi.command()
+@click.argument('period', default='1')
+def extract(period):
+    """report extractors depleting in PERIOD from now"""
+    click.echo(planets.extract(93322824, period=period))
+
