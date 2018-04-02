@@ -7,7 +7,8 @@ setup(
     install_requires=[
         'Click',
         'Requests',
-        'Maya'
+        'Maya',
+        'CherryPy',
     ],
     entry_points='''
         [console_scripts]   

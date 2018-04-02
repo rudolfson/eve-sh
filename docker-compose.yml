@@ -1,0 +1,23 @@
+version: '3'
+services:
+    db-app:
+        image: eve-sh/db-app
+        build: ./db-app
+        container_name: db-app
+        volumes:
+            - db-app-data:/var/lib/postgresql/data
+        ports:
+            - "5432:5432"
+
+    db-evesde:
+        image: eve-sh/db-evesde
+        build: ./db-evesde
+        container_name: db-evesde
+        volumes:
+            - db-evesde-data:/var/lib/postgresql/data
+        ports:
+            - "5543:5432"
+
+volumes:
+    db-evesde-data:
+    db-app-data:

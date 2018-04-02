@@ -11,6 +11,7 @@ requests = "*"
 click = "*"
 "e1839a8" = {path = ".", editable = true}
 maya = "*"
+cherrypy = "*"
 
 
 [dev-packages]
