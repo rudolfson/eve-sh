@@ -1,3 +1,12 @@
+"""Implementation of EVE SSO authentication.
+
+To make use of authentication you need to decorate the according method with
+
+    @authenticated(scope)
+
+See https://eveonline-third-party-documentation.readthedocs.io/en/latest/sso/intro.html
+for details upon EVE's authentication.
+"""
 import functools
 import requests
 import cherrypy
@@ -7,7 +16,7 @@ import string
 import random
 import threading
 
-URL = 'https://login.eveonline.com/oauth/'
+AUTH_URL = 'https://login.eveonline.com/oauth/'
 
 cherrypy.config.update({'server.socket_port': 7070})
 cherrypy.config.update({'server.shutdown_timeout': 1})
@@ -27,6 +36,11 @@ class Authenticator(object):
 
 
 def authenticated(scopes):
+    """Decorate a call to the ESI API to handle authentication
+
+    The character's id after login will be available as a keyword argument "character_id".
+    """
+
     def authenticated_decorator(func):
         @functools.wraps(func)
         def wrapper(*args, **kwargs):
@@ -35,7 +49,7 @@ def authenticated(scopes):
             browser_params = dict(response_type='code', redirect_uri='http://localhost:7070/callback',
                                   client_id='ca73ab1ab8a949518d8e9d35ea46d2d2',
                                   scope=' '.join(scopes), state=state)
-            browser_url = requests.Request('GET', URL + 'authorize', params=browser_params).prepare().url
+            browser_url = requests.Request('GET', AUTH_URL + 'authorize', params=browser_params).prepare().url
             # prepare embedded http server for callback
             authenticator = Authenticator()
             print(f'TRACE active threads = {threading.active_count()}')
@@ -48,6 +62,13 @@ def authenticated(scopes):
             cherrypy.engine.wait(cherrypy.engine.states.EXITING)
             cherrypy.server.stop()
 
+            # now get the access token
+            access_token = _get_access_token(authenticator.code)
+            print(f'TRACE access token is {access_token}')
+            verification = _verify(access_token)
+            print(f'TRACE verification returned {verification}')
+
+            # do the actual call
             result = func(*args, **kwargs)
 
             print(f'TRACE active threads = {threading.active_count()}')
@@ -61,3 +82,22 @@ def authenticated(scopes):
         return wrapper
 
     return authenticated_decorator
+
+
+def _get_access_token(authorization_code):
+    """After authentication fetch an access token to do the actual API call"""
+
+    data = {'grant_type': 'authorization_code', 'code': authorization_code}
+    authentication = ('ca73ab1ab8a949518d8e9d35ea46d2d2', 'crLG9e6cQ7rYlDxgVZKEfH0yw2x3VFkUBPdy2MYb')
+    response = requests.post(AUTH_URL + 'token', json=data, auth=authentication)
+    response.raise_for_status()
+    return response.json()
+
+
+def _verify(access_token):
+    """Verify the fetched access_token"""
+
+    headers = {'Authorization': f"{access_token['token_type']} {access_token['access_token']}"}
+    response = requests.get(AUTH_URL + 'verify', headers=headers)
+    response.raise_for_status()
+    return response.json()
