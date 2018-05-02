@@ -49,5 +49,5 @@ def pi():
 @click.argument('period', default='1')
 def extract(period):
     """report extractors depleting in PERIOD from now"""
-    click.echo(planets.extract(93322824, period=period))
+    click.echo(planets.extract(period=period))
 
