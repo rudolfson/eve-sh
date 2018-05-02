@@ -23,7 +23,7 @@ To add a new library during development use
 You can install the program but need to configure the `setup.py` first. It
 needs to include all the required libraries.
 
-The run
+Then run
 
     pipenv install -e .
     
