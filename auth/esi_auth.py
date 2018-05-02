@@ -14,7 +14,6 @@ import datetime
 import click
 import string
 import random
-import threading
 
 AUTH_URL = 'https://login.eveonline.com/oauth/'
 
@@ -24,6 +23,10 @@ cherrypy.config.update({'engine.autoreload.on': False})
 
 
 class Authenticator(object):
+    """Provide a callback to the authentication request and store the provided authentication data.
+
+    """
+
     def __init__(self):
         self.code = None
         self.state = None
@@ -52,7 +55,6 @@ def authenticated(scopes):
             browser_url = requests.Request('GET', AUTH_URL + 'authorize', params=browser_params).prepare().url
             # prepare embedded http server for callback
             authenticator = Authenticator()
-            print(f'TRACE active threads = {threading.active_count()}')
             cherrypy.tree.mount(authenticator, '')
             cherrypy.engine.subscribe('after_request', lambda: cherrypy.engine.exit())
             cherrypy.engine.start()
@@ -64,18 +66,15 @@ def authenticated(scopes):
 
             # now get the access token
             access_token = _get_access_token(authenticator.code)
-            print(f'TRACE access token is {access_token}')
             verification = _verify(access_token)
-            print(f'TRACE verification returned {verification}')
+            kwargs['character_id'] = verification['CharacterID']
+            authorization_header = _create_authorization_header(access_token)
+            if 'request_headers' not in kwargs:
+                kwargs['request_headers'] = {}
+            kwargs['request_headers'] = {**kwargs['request_headers'], **authorization_header}
 
             # do the actual call
             result = func(*args, **kwargs)
-
-            print(f'TRACE active threads = {threading.active_count()}')
-            for t in threading.enumerate():
-                print(f'TRACE thread {t}')
-                if t is not threading.current_thread():
-                    print(f'{t} is not the current one')
 
             return result
 
@@ -97,7 +96,12 @@ def _get_access_token(authorization_code):
 def _verify(access_token):
     """Verify the fetched access_token"""
 
-    headers = {'Authorization': f"{access_token['token_type']} {access_token['access_token']}"}
+    headers = _create_authorization_header(access_token)
     response = requests.get(AUTH_URL + 'verify', headers=headers)
     response.raise_for_status()
     return response.json()
+
+
+def _create_authorization_header(access_token):
+    """Create a dictionary containing the Authorization header"""
+    return {'Authorization': f"{access_token['token_type']} {access_token['access_token']}"}
