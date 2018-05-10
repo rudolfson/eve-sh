@@ -1,9 +1,9 @@
-import click
-import requests
-from market import evepraisal
-from planets import planets
+from email import header
 
-URL = 'https://esi.tech.ccp.is/latest/{0}?datasource=tranquility'
+import click
+import esi
+import evepraisal
+import planets
 
 
 @click.group()
@@ -15,11 +15,11 @@ def cli():
 @cli.command()
 def status():
     """display current server status"""
-    response = requests.get(URL.format('status/'))
-    data = response.json()
-    if 'players' in data:
+    op = esi.app.op['get_status']()
+    response = esi.client.request(op)
+    if 'players' in response.data:
         click.secho('Server is {} with {} players'.format(click.style('running', fg='green'),
-                                                          click.style(str(data['players']), fg='blue')))
+                                                          click.style(str(response.data['players']), fg='blue')))
 
 
 @cli.group()

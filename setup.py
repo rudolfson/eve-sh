@@ -6,9 +6,11 @@ setup(
     py_modules=['evesh'],
     install_requires=[
         'Click',
+        'EsiPy',
         'Requests',
         'Maya',
         'CherryPy',
+        'Roman',
     ],
     entry_points='''
         [console_scripts]   

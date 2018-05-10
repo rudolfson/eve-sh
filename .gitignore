@@ -103,4 +103,4 @@ ENV/
 #
 # own stuff#
 .idea
-
+*.pickle
