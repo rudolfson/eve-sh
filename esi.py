@@ -1,13 +1,13 @@
-import esipy
+import datetime
+import functools
 import os
 import pickle
-import functools
-import requests
-import cherrypy
-import datetime
-import click
-import string
 import random
+import string
+
+import cherrypy
+import click
+import esipy
 
 # On loading the module initialize the ESI Swagger App, Client and Security
 if os.path.isfile('app.pickle'):
@@ -19,11 +19,14 @@ else:
         pickle.dump(app, f)
 security = esipy.EsiSecurity(app=app, redirect_uri='http://localhost:7070/callback',
                              client_id='ca73ab1ab8a949518d8e9d35ea46d2d2',
-                             secret_key='crLG9e6cQ7rYlDxgVZKEfH0yw2x3VFkUBPdy2MYb', headers={'User-Agent': 'EVE CLI by Leonty Alkaev'})
+                             secret_key='crLG9e6cQ7rYlDxgVZKEfH0yw2x3VFkUBPdy2MYb',
+                             headers={'User-Agent': 'EVE CLI by Leonty Alkaev'})
 client = esipy.EsiClient(security=security, headers={'User-Agent': 'EVE CLI by Leonty Alkaev'})
 
 # Configure the callback server
 # TODO switch to flask again and use the shutdown function, see http://flask.pocoo.org/snippets/67/
+cherrypy.log.screen = None
+cherrypy.log.logger_root = None
 cherrypy.config.update({'server.socket_port': 7070})
 cherrypy.config.update({'server.shutdown_timeout': 1})
 cherrypy.config.update({'engine.autoreload.on': False})
@@ -59,7 +62,7 @@ def authenticated(scopes):
             browser_url = security.get_auth_uri(scopes, state=state)
             # prepare embedded http server for callback
             authenticator = Authenticator()
-            cherrypy.tree.mount(authenticator, '')
+            cherrypy.tree.mount(authenticator, '/', config={'/': {}})
             cherrypy.engine.subscribe('after_request', lambda: cherrypy.engine.exit())
             cherrypy.engine.start()
             # open the browser url
@@ -74,5 +77,7 @@ def authenticated(scopes):
             result = func(*args, **kwargs)
 
             return result
+
         return wrapper
+
     return authenticated_decorator

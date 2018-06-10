@@ -46,8 +46,22 @@ def pi():
 
 
 @pi.command()
-@click.argument('period', default='1')
-def extract(period):
-    """report extractors depleting in PERIOD from now"""
-    click.echo(planets.extract(period=period))
+@click.argument('days', default=1)
+@click.argument('hours', default=0)
+def extract(days, hours):
+    """report extractors depleting in DAYS and HOURS from now"""
+    for planet, extractors in planets.extract(days=days, hours=hours).items():
+        extractor_display = list(map(_style_extractor_info, extractors))
+        click.secho('{0:<20} {1}\n            {2}'.format(click.style(planet, fg='white'), extractor_display[0], extractor_display[1]))
 
+
+def _style_extractor_info(info):
+    """use clicks styling to create a representation for the extractor info
+
+    :param info: extractor info
+    """
+    if info['is_depleted']:
+        return click.style('depleted', fg='white', bg='red')
+    if info['will_deplete']:
+        return click.style(info['expires_in'], fg='red')
+    return click.style(info['expires_in'], fg='green')

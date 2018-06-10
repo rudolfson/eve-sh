@@ -8,7 +8,6 @@ setup(
         'Click',
         'EsiPy',
         'Requests',
-        'Maya',
         'CherryPy',
         'Roman',
     ],
