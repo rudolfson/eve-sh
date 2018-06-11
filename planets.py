@@ -23,8 +23,11 @@ def extract(days=1, hours=0):
         extractors = map(_create_expiry_info(now, deplete_in), filter(lambda pin: 'expiry_time' in pin, colony['pins']))
         result[planet_info['name']] = list(extractors)
 
-    result = collections.OrderedDict(sorted(result.items(), key=lambda item: roman.fromRoman(item[0].split()[1])))
-    return result
+    return {
+        'character_name': character_info['CharacterName'],
+        'planets': collections.OrderedDict(
+            sorted(result.items(), key=lambda item: roman.fromRoman(item[0].split()[1]))),
+    }
 
 
 def _planets(character_id):

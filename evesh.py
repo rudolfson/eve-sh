@@ -50,9 +50,14 @@ def pi():
 @click.argument('hours', default=0)
 def extract(days, hours):
     """report extractors depleting in DAYS and HOURS from now"""
-    for planet, extractors in planets.extract(days=days, hours=hours).items():
+    result = planets.extract(days=days, hours=hours)
+    click.secho(
+        'Planets of {0}, expiry in {1} days {2} hours'.format(result['character_name'], days,
+                                                              hours))
+    for planet, extractors in result['planets'].items():
         extractor_display = list(map(_style_extractor_info, extractors))
-        click.secho('{0:<20} {1}\n            {2}'.format(click.style(planet, fg='white'), extractor_display[0], extractor_display[1]))
+        click.secho('{0:<20} {1}\n            {2}'.format(click.style(planet, fg='white'), extractor_display[0],
+                                                          extractor_display[1]))
 
 
 def _style_extractor_info(info):
