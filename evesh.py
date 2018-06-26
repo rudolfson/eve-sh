@@ -1,9 +1,9 @@
-from email import header
-
 import click
+
 import esi
+import esi_location
+import esi_planets
 import evepraisal
-import planets
 
 
 @click.group()
@@ -50,7 +50,7 @@ def pi():
 @click.argument('hours', default=0)
 def extract(days, hours):
     """report extractors depleting in DAYS and HOURS from now"""
-    result = planets.extract(days=days, hours=hours)
+    result = esi_planets.extract(days=days, hours=hours)
     click.secho(
         'Planets of {0}, expiry in {1} days {2} hours'.format(result['character_name'], days,
                                                               hours))
@@ -70,3 +70,13 @@ def _style_extractor_info(info):
     if info['will_deplete']:
         return click.style(info['expires_in'], fg='red')
     return click.style(info['expires_in'], fg='green')
+
+
+@cli.command()
+def location():
+    """get the character location"""
+    result = esi_location.location()
+    click.secho(
+        '{0} is located in {1} piloting a {2}'.format(click.style(result['character_name'], fg='blue'),
+                                                      click.style(result['solar_system'], fg='white'),
+                                                      click.style(result['ship'], fg='yellow')))
